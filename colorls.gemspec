@@ -14,6 +14,9 @@ ColorLS::POST_INSTALL_MESSAGE = %(
     Help menu     : `colorls -h` provides all possible flag options
 
     Tab completion enabled for flags
+
+    Report flag   : reassigned -r to the --reverse flag
+
   *******************************************************************
 ).freeze
 
