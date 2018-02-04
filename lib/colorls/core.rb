@@ -234,28 +234,18 @@ module ColorLS
 
     def git_file_info(path)
       return '  ✓ '.colorize(@colors[:unchanged]) unless @git_status[path]
-      Git.colored_status_symbols(@git_status[path], @colors)
-    end
-
-    Dir.class_eval do
-      def self.deep_entries(path)
-        (Dir.entries(path) - ['.', '..']).map do |entry|
-          if Dir.exist?("#{path}/#{entry}")
-            Dir.deep_entries("#{path}/#{entry}")
-          else
-            entry
-          end
-        end.flatten
-      end
+      Git.colored_status_symbols(@git_status[path].uniq, @colors)
     end
 
     def git_dir_info(path)
-      ignored = @git_status.select { |file, mode| file.start_with?(path) && mode=='!!' }.keys
-      present = Dir.deep_entries(path).map { |p| "#{path}/#{p}" }
-      return '    ' if (present-ignored).empty?
+      modes = @git_status.select { |file| file.start_with?(path) }
 
-      modes = (present-ignored).map { |file| @git_status[file] }-[nil]
       return '  ✓ '.colorize(@colors[:unchanged]) if modes.empty?
+
+      return '    ' if modes.values.all? { |mode| mode == '!!' }
+
+      modes = modes.values.reject { |mode| mode == '!!' }
+
       Git.colored_status_symbols(modes.join.uniq, @colors)
     end
 
