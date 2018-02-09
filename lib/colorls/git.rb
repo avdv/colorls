@@ -3,12 +3,13 @@ module ColorLS
     def self.status(repo_path)
       @git_status = {}
 
-      IO.popen(['git', '-C', repo_path, 'status', '--porcelain', '-z', '--ignored']) do |output|
-        output.read.split("\x0").map { |x| x.split(' ', 2) }.each do |mode, file|
-          @git_status[file] = mode
-        end
+      call_git('-C', repo_path, 'status', '--porcelain', '-z', '--ignored', '-uno') do |mode, file|
+        @git_status[file] = mode if mode == '??'
       end
-      warn "git status failed in #{repo_path}" unless $CHILD_STATUS.success?
+
+      call_git('-C', repo_path, 'status', '--porcelain', '-z', '-unormal') do |mode, file|
+        @git_status[file] = mode
+      end
 
       @git_status
     end
@@ -28,6 +29,13 @@ module ColorLS
         .gsub('M', 'M'.colorize(colors[:modification]))
         .gsub('D', 'D'.colorize(colors[:deletion]))
         .tr('!', ' ')
+    end
+
+    private_class_method def self.call_git(*args)
+      IO.popen(['git'] + args) do |output|
+        output.read.split("\x0").each { |x| yield x.split(' ', 2) }
+      end
+      warn "git status failed in #{repo_path}" unless $CHILD_STATUS.success?
     end
   end
 end
