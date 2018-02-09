@@ -3,7 +3,7 @@ module ColorLS
     def self.status(repo_path)
       @git_status = {}
 
-      IO.popen(['git', '-C', repo_path, 'status', '--porcelain', '-z', '--ignored']) do |output|
+      IO.popen(['git', '-C', repo_path, 'status', '--porcelain', '-z', '-unormal', '--ignored']) do |output|
         output.read.split("\x0").map { |x| x.split(' ', 2) }.each do |mode, file|
           @git_status[file] = mode
         end
@@ -14,13 +14,7 @@ module ColorLS
     end
 
     def self.colored_status_symbols(modes, colors)
-      modes =
-        case modes.length
-        when 1 then "  #{modes} "
-        when 2 then " #{modes} "
-        when 3 then "#{modes} "
-        when 4 then modes
-        end
+      modes = modes.rjust(3).ljust(4)
 
       modes
         .gsub('?', '?'.colorize(colors[:untracked]))

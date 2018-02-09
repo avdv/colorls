@@ -218,7 +218,9 @@ module ColorLS
     def git_info(path, content)
       return '' unless @git_status
 
-      # puts "\n\n"
+      abs_path = File.absolute_path(File.join(path, content.name))
+
+      return '    ' unless abs_path.start_with? @git_root_path
 
       relative_path = path.remove(@git_root_path+'/')
       relative_path = relative_path==path ? '' : relative_path+'/'
