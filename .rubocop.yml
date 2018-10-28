@@ -3,6 +3,8 @@ AllCops:
     - 'lib/**/*'
   Exclude:
     - 'vendor/**/*'
+    - '**/tabul*'
+    - 'bin/*'
     - 'benchmarks/*'
     - 'profile/*'
     - 'lib/yaml/*'

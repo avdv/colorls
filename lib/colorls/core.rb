@@ -1,3 +1,4 @@
+# coding: utf-8
 module ColorLS
   class Core
     def initialize(input, all: false, report: false, sort: false, show: false,
@@ -154,47 +155,42 @@ module ColorLS
       return @contents.zip if @one_per_line || @long
       return chunkify_horizontal if @horizontal
 
-      chunk_size = @contents.size
+      num_of_lines = 1
       max_widths = @max_widths
 
-      until in_line(chunk_size, max_widths) || chunk_size <= 1
-        chunk_size -= 1
-        max_width_cols  = @max_widths.each_slice((@contents.size.to_f/chunk_size).ceil).to_a
-        max_widths      = max_width_cols[0].zip(*max_width_cols[1..-1]).map(&:compact)
-        (1...max_widths.size).each do |i|
-          max_widths[i] += [0] * (max_widths.first.size - max_widths[i].size)
-        end
-        max_widths = max_widths.transpose.map(&:max)
+      until in_line(max_widths) || num_of_lines >= @contents.size
+        num_of_lines += 1
+        max_width_cols = @max_widths.each_slice(num_of_lines).to_a
+        #max_width_cols[-1].fill(0, -1...num_of_lines)
+        max_widths = max_width_cols.map(&:max)
       end
       @max_widths = max_widths
-      @contents = get_chunk(@max_widths.size)
+      @contents = get_chunk(num_of_lines)
     end
 
     def get_chunk(chunk_size)
-      columns = @contents.each_slice((@contents.size.to_f/chunk_size).ceil).to_a
-      columns[0].zip(*columns[1..-1])
+      columns = @contents.each_slice(chunk_size).to_a
+      lines = columns.first.size
+      columns[-1].fill(nil, -1...lines)
+      columns.transpose
     end
 
     def chunkify_horizontal
       chunk_size = @contents.size
       max_widths = @max_widths
 
-      until in_line(chunk_size, max_widths) || chunk_size <= 1
+      until in_line(max_widths) || chunk_size <= 1
         chunk_size -= 1
-        max_widths      = @max_widths.each_slice(chunk_size).to_a
-        max_widths[-1] += [0] * (chunk_size - max_widths.last.size)
-        max_widths      = max_widths.transpose.map(&:max)
+        max_widths = @max_widths.each_slice(chunk_size).to_a
+        max_widths[-1].fill(0, -1...chunk_size)
+        max_widths = max_widths.transpose.map(&:max)
       end
-      @max_widths = max_widths
-      @contents = get_chunk_horizontal(chunk_size)
+      @max_widths = max_widths # .map(&:max)
+      @contents = @contents.each_slice(chunk_size).to_a
     end
 
-    def get_chunk_horizontal(chunk_size)
-      @contents.each_slice(chunk_size).to_a
-    end
-
-    def in_line(chunk_size, max_widths)
-      (max_widths.sum + 12 * chunk_size <= @screen_width)
+    def in_line(max_widths)
+      (max_widths.sum + 12 * max_widths.size <= @screen_width)
     end
 
     def display_report
@@ -337,7 +333,8 @@ module ColorLS
         break if content.nil? || content.name.empty?
 
         print "  #{fetch_string(@input, content, *options(content))}"
-        print ' ' * (@max_widths[i] - content.name.length) unless @one_per_line || @long
+        padding = @max_widths[i] - content.name.length
+        print ' ' * padding unless @one_per_line || @long || padding < 0
       end
       print "\n"
     end
