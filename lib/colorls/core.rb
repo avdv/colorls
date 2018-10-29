@@ -175,18 +175,30 @@ module ColorLS
       columns.transpose
     end
 
-    def chunkify_horizontal
-      chunk_size = @contents.size
-      max_widths = @max_widths
+    def needed_width(max_widths)
+      max_widths.sum + 12 * max_widths.size
+    end
 
-      until in_line(max_widths) || chunk_size <= 1
-        chunk_size -= 1
-        max_widths = @max_widths.each_slice(chunk_size).to_a
-        max_widths[-1].fill(0, -1...chunk_size)
-        max_widths = max_widths.transpose.map(&:max)
+    def chunkify_horizontal
+      max_chunks = @contents.size / 12 # an item needs at least 12 chars
+      min_chunks = 1
+      max_widths = @max_widths
+      mid = max_chunks
+
+      while min_chunks < max_chunks
+        mid = ((max_chunks + min_chunks).to_f / 2).ceil
+        max_widths = @max_widths.each_slice(mid).to_a
+        max_widths[-1].fill(0, -1...mid)
+        max_widths = max_widths.transpose.map!(&:max)
+
+        if needed_width(max_widths) > @screen_width
+          max_chunks = mid - 1
+        else
+          min_chunks = mid
+        end
       end
       @max_widths = max_widths # .map(&:max)
-      @contents = @contents.each_slice(chunk_size).to_a
+      @contents = @contents.each_slice(mid).to_a
     end
 
     def in_line(max_widths)
