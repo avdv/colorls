@@ -180,10 +180,9 @@ module ColorLS
     end
 
     def chunkify_horizontal
-      max_chunks = @contents.size / 12 # an item needs at least 12 chars
+      max_chunks = @screen_width / 12 # 12 chars per item
       min_chunks = 1
       max_widths = @max_widths
-      mid = max_chunks
 
       while min_chunks < max_chunks
         mid = ((max_chunks + min_chunks).to_f / 2).ceil
@@ -198,7 +197,7 @@ module ColorLS
         end
       end
       @max_widths = max_widths # .map(&:max)
-      @contents = @contents.each_slice(mid).to_a
+      @contents = @contents.each_slice(min_chunks).to_a
     end
 
     def in_line(max_widths)
