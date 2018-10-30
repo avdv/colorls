@@ -155,17 +155,25 @@ module ColorLS
       return @contents.zip if @one_per_line || @long
       return chunkify_horizontal if @horizontal
 
-      num_of_lines = 1
+      max_chunks = @max_widths.size # 12 chars per item
+      min_chunks = max_chunks / (@screen_width / 12)
       max_widths = @max_widths
+      puts "#{min_chunks} ..  .. #{max_chunks}"
 
-      until in_line(max_widths) || num_of_lines >= @contents.size
-        num_of_lines += 1
-        max_width_cols = @max_widths.each_slice(num_of_lines).to_a
+      while min_chunks < max_chunks
+        mid = ((min_chunks + max_chunks).to_f / 2).ceil
+        max_width_cols = @max_widths.each_slice(mid).to_a
         #max_width_cols[-1].fill(0, -1...num_of_lines)
         max_widths = max_width_cols.map(&:max)
+        puts "#{min_chunks} .. #{mid} .. #{max_chunks} - #{needed_width(max_widths)}"
+        if needed_width(max_widths) > @screen_width
+          min_chunks = mid
+        else
+          max_chunks = mid - 1
+        end
       end
       @max_widths = max_widths
-      @contents = get_chunk(num_of_lines)
+      @contents = get_chunk(max_chunks)
     end
 
     def get_chunk(chunk_size)
