@@ -159,7 +159,7 @@ module ColorLS
       min_chunks = 1
       max_widths = @max_widths
 
-      while min_chunks < max_chunks
+      while true
         mid = ((min_chunks + max_chunks).to_f / 2).ceil
         chunk_size = (@max_widths.size.to_f / mid).ceil
         max_width_cols = @max_widths.each_slice(chunk_size).to_a
@@ -167,12 +167,14 @@ module ColorLS
 
         if needed_width(max_widths) > @screen_width
           max_chunks = mid - 1
-        else
+        elsif min_chunks < mid
           min_chunks = mid
+        else
+          break
         end
       end
-      chunk_size = (@max_widths.size.to_f / min_chunks).ceil
-      @max_widths = @max_widths.each_slice(chunk_size).to_a.map!(&:max)
+      #chunk_size = (@max_widths.size.to_f / min_chunks).ceil
+      @max_widths = max_chunks # @max_widths.each_slice(chunk_size).to_a.map!(&:max)
       @contents = get_chunk(chunk_size)
     end
 
