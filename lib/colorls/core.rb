@@ -173,8 +173,7 @@ module ColorLS
           break
         end
       end
-      #chunk_size = (@max_widths.size.to_f / min_chunks).ceil
-      @max_widths = max_chunks # @max_widths.each_slice(chunk_size).to_a.map!(&:max)
+      @max_widths = max_widths
       @contents = get_chunk(chunk_size)
     end
 
