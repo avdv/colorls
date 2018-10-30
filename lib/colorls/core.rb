@@ -158,14 +158,14 @@ module ColorLS
       max_chunks = @max_widths.size # 12 chars per item
       min_chunks = max_chunks / (@screen_width / 12)
       max_widths = @max_widths
-      puts "#{min_chunks} ..  .. #{max_chunks}"
+      puts "#{min_chunks} ..  .. #{max_chunks} = #{@screen_width}"
 
       while min_chunks < max_chunks
         mid = ((min_chunks + max_chunks).to_f / 2).ceil
         max_width_cols = @max_widths.each_slice(mid).to_a
         #max_width_cols[-1].fill(0, -1...num_of_lines)
         max_widths = max_width_cols.map(&:max)
-        puts "#{min_chunks} .. #{mid} .. #{max_chunks} - #{needed_width(max_widths)}"
+        puts "#{min_chunks} .. #{mid} .. #{max_chunks} - #{needed_width(max_widths)} (#{max_widths.size})"
         if needed_width(max_widths) > @screen_width
           min_chunks = mid
         else
