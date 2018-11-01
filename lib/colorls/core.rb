@@ -26,20 +26,28 @@ module ColorLS
       init_colors colors
 
       @contents   = init_contents(input)
-      @max_widths = @contents.map { |c| c.name.length }
       init_icons
     end
 
     def ls
       return print "\n   Nothing to show here\n".colorize(@colors[:empty]) if @contents.empty?
 
-      if @tree
-        print "\n"
-        tree_traverse(@input, 0, 2)
-      else
-        @contents = chunkify
-        @contents.each { |chunk| ls_line(chunk) }
+      layout = case
+               when @tree then
+                 print "\n"
+                 return tree_traverse(@input, 0, 2)
+               when @horizontal then
+                 HorizontalLayout.new(@contents, @screen_width)
+               when @one_per_line || @long then
+                 HorizontalLayout.new(@contents, 1)
+               else
+                 VerticalLayout.new(@contents, @screen_width)
+               end
+
+      layout.each_line do |line, widths|
+        ls_line(line, widths)
       end
+
       display_report if @report
       true
     end
@@ -149,68 +157,6 @@ module ColorLS
 
       @all_files   = @file_keys + @file_aliase_keys
       @all_folders = @folder_keys + @folder_aliase_keys
-    end
-
-    def chunkify
-      return @contents.zip if @one_per_line || @long
-      return chunkify_horizontal if @horizontal
-
-      max_chunks = @screen_width / 12 # 12 chars per item
-      min_chunks = 1
-      max_widths = @max_widths
-
-      while true
-        mid = ((min_chunks + max_chunks).to_f / 2).ceil
-        chunk_size = (@max_widths.size.to_f / mid).ceil
-        max_width_cols = @max_widths.each_slice(chunk_size).to_a
-        max_widths = max_width_cols.map(&:max)
-
-        if needed_width(max_widths) > @screen_width
-          max_chunks = mid - 1
-        elsif min_chunks < mid
-          min_chunks = mid
-        else
-          break
-        end
-      end
-      @max_widths = max_widths
-      @contents = get_chunk(chunk_size)
-    end
-
-    def get_chunk(chunk_size)
-      columns = @contents.each_slice(chunk_size).to_a
-      lines = columns.first.size
-      columns[-1].fill(nil, -1...lines)
-      columns.transpose
-    end
-
-    def needed_width(max_widths)
-      max_widths.sum + 12 * max_widths.size
-    end
-
-    def chunkify_horizontal
-      max_chunks = @screen_width / 12 # 12 chars per item
-      min_chunks = 1
-      max_widths = @max_widths
-
-      while min_chunks < max_chunks
-        mid = ((max_chunks + min_chunks).to_f / 2).ceil
-        max_widths = @max_widths.each_slice(mid).to_a
-        max_widths[-1].fill(0, -1...mid)
-        max_widths = max_widths.transpose.map!(&:max)
-
-        if needed_width(max_widths) > @screen_width
-          max_chunks = mid - 1
-        else
-          min_chunks = mid
-        end
-      end
-      @max_widths = max_widths # .map(&:max)
-      @contents = @contents.each_slice(min_chunks).to_a
-    end
-
-    def in_line(max_widths)
-      (max_widths.sum + 12 * max_widths.size <= @screen_width)
     end
 
     def display_report
@@ -348,13 +294,13 @@ module ColorLS
       ].join
     end
 
-    def ls_line(chunk)
+    def ls_line(chunk, widths)
       chunk.each_with_index do |content, i|
-        break if content.nil? || content.name.empty?
+        break if content.nil?
 
         print "  #{fetch_string(@input, content, *options(content))}"
-        padding = @max_widths[i] - content.name.length
-        print ' ' * padding unless @one_per_line || @long || padding < 0
+        padding = widths[i] - content.name.length
+        print ' ' * padding unless i + 1 == chunk.size
       end
       print "\n"
     end
