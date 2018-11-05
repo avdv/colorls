@@ -1,6 +1,10 @@
 #!/usr/bin/env ruby
 
 require 'colorls'
-
+require 'ruby-prof'
+RubyProf.start
 ColorLS::Flags.new(*ARGV).process
+result = RubyProf.stop
+printer = RubyProf::CallStackPrinter.new(result)
+printer.print(File.open("prof.html", "w"))
 true
