@@ -295,14 +295,16 @@ module ColorLS
     end
 
     def ls_line(chunk, widths)
+      padding = 0
+      line = ''
       chunk.each_with_index do |content, i|
         break if content.nil?
 
-        print "  #{fetch_string(@input, content, *options(content))}"
+        line += ' ' * padding
+        line += "  #{fetch_string(@input, content, *options(content))}"
         padding = widths[i] - content.name.length
-        print ' ' * padding unless i + 1 == chunk.size
       end
-      print "\n"
+      print "#{line}\n"
     end
 
     def options(content)
