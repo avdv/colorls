@@ -1,3 +1,4 @@
+# coding: utf-8
 require 'spec_helper'
 
 RSpec.describe ColorLS::Flags do
@@ -27,7 +28,7 @@ RSpec.describe ColorLS::Flags do
   end
 
   context 'with --reverse flag' do
-    let(:args) { ['--reverse', FIXTURES] }
+    let(:args) { ['--reverse', '-x', FIXTURES] }
 
     it { is_expected.to match(/z-file.+symlinks.+a-file/m) } # displays dirs & files in reverse alphabetical order
   end
@@ -109,7 +110,7 @@ RSpec.describe ColorLS::Flags do
   end
 
   context 'with --sort-files flag' do
-    let(:args) { ['--sort-files', FIXTURES] }
+    let(:args) { ['--sort-files', '-x', FIXTURES] }
 
     it { is_expected.to match(/a-file.+z-file.+symlinks/m) } # sorts results alphabetically, files first
   end
@@ -126,7 +127,7 @@ RSpec.describe ColorLS::Flags do
 
     expected = Regexp.new files.reverse.join('.+'), Regexp::MULTILINE
 
-    let(:args) { ['--sort=time', FIXTURES] }
+    let(:args) { ['--sort=time', '-x', FIXTURES] }
 
     it { is_expected.to match(expected) }
   end
@@ -138,7 +139,7 @@ RSpec.describe ColorLS::Flags do
   end
 
   context 'with --sort=extension flag' do
-    let(:args) { ['--sort=extension', FIXTURES] }
+    let(:args) { ['--sort=extension', '-x', FIXTURES] }
 
     it { is_expected.to match(/a-file.+symlinks.+z-file.+a.md.+a.txt.+z.txt/m) } # sorts results by extension
   end
@@ -182,13 +183,13 @@ RSpec.describe ColorLS::Flags do
   end
 
   context 'symlinked directory' do
-    let(:args) { [File.join(FIXTURES, 'symlinks', 'Supportlink')] }
+    let(:args) { ['-x', File.join(FIXTURES, 'symlinks', 'Supportlink')] }
 
     it { is_expected.to match(/Supportlink/) }
   end
 
   context 'symlinked directory with trailing separator' do
-    let(:args) { [File.join(FIXTURES, 'symlinks', 'Supportlink', File::SEPARATOR)] }
+    let(:args) { ['-x', File.join(FIXTURES, 'symlinks', 'Supportlink', File::SEPARATOR)] }
 
     it { is_expected.to match(/yaml_sort_checker.rb/) }
   end

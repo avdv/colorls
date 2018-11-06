@@ -41,7 +41,7 @@ module ColorLS
                when @one_per_line || @long then
                  HorizontalLayout.new(@contents, 1)
                else
-                 VerticalLayout.new(@contents, @screen_width) { |c| c.name.length }
+                 VerticalLayout.new(@contents, @screen_width)
                end
 
       layout.each_line do |line, widths|
