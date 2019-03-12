@@ -281,13 +281,15 @@ module ColorLS
     end
 
     def slash?(content)
-      content.directory? ? '/'.colorize(@colors[:dir]) : ' '
+      content.directory? ? '/'.colorize(dir_color(content)) : ' '
     end
 
     def fetch_string(path, content, key, color, increment)
       @count[increment] += 1
       value = increment == :folders ? @folders[key] : @files[key]
+
       logo  = value.gsub(/\\u[\da-f]{4}/i) { |m| [m[-4..-1].to_i(16)].pack('U') }
+
       name = content.name
       name = make_link(path, name) if @hyperlink
 
@@ -309,6 +311,18 @@ module ColorLS
       print "\n"
     end
 
+    def dir_color(content)
+      return @colors[:dir] unless @colors[:dir_suffixes]
+
+      name = content.name
+
+      suffix_arr = @colors[:dir_suffixes].find do |suffix|
+        name.end_with? suffix[0].to_s
+      end
+
+      suffix_arr ? suffix_arr[1] : @colors[:dir]
+    end
+
     def file_color(file, key)
       color_key = case
                   when file.chardev? then :chardev
@@ -325,7 +339,7 @@ module ColorLS
         key = content.name.to_sym
         key = @folder_aliases[key] unless @folders.key? key
         key = :folder if key.nil?
-        color = @colors[:dir]
+        color = dir_color(content)
         group = :folders
       else
         key = content.name.split('.').last.downcase.to_sym
