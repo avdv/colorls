@@ -15,10 +15,7 @@ cache:
     - /C/tools/msys64
 
 rvm:
-  - '2.5'
-  - '2.6'
   - '2.7'
-  - 'truffleruby-head'
 
 jobs:
   fast_finish: true
@@ -28,9 +25,6 @@ jobs:
     - os: windows
 
   include:
-    - os: osx
-      rvm: '2.7'
-
     - os: windows
       language: bash
       before_cache:
@@ -40,6 +34,8 @@ jobs:
       before_install:
         - ruby --version
         - gem --version
+        - python --version
+        - ./test.bat
         - choco install msys2 --params /NoUpdate
         - powershell -Command 'Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass ; & c:\tools\ruby27\bin\ridk.ps1' install dev_tools
       install:
