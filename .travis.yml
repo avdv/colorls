@@ -44,13 +44,11 @@ jobs:
         - gem --version
         - 'if [[ -f C:/tools/msys64/msys2_shell.cmd ]]; then rm -rf C:/tools/msys64; fi'
         - choco uninstall -y mingw
-        - choco upgrade --no-progress -y msys2 --params /NoUpdate
+        - choco upgrade --no-progress -y msys2 --params /NoUpdate || (cat /C/ProgramData/chocolatey/logs/chocolatey.log ; exit 1)
         #- choco install msys2 # --params /NoUpdate
         - powershell -Command 'Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass ; & c:\tools\ruby27\bin\ridk.ps1' install dev_tools
       install:
         - bundle install --retry=3
-      after_failure:
-        - cat /C/ProgramData/chocolatey/logs/chocolatey.log
 
 before_install:
   - gem --version
