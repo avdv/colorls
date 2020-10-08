@@ -152,7 +152,7 @@ RSpec.describe ColorLS::Flags do
   end
 
   context 'with --sort=time' do
-    entries = Dir.entries(FIXTURES).grep(/^[^.]/).shuffle.freeze
+    entries = Dir.entries(FIXTURES, encoding: Encoding::UTF_8).grep(/^[^.]/).shuffle.freeze
     mtime = Time.new(2017, 11, 7, 2, 2, 2).freeze
 
     files = entries.each_with_index do |e, i|
