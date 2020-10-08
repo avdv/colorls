@@ -21,6 +21,7 @@ module ColorLS
     end
 
     def self.info(path)
+      $stderr.puts "info: #{path} - #{path.encoding}"
       FileInfo.new(path)
     end
 
