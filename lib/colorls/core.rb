@@ -284,6 +284,10 @@ module ColorLS
       end
     end
 
+    def out_encode(str)
+      str.encode(Encoding.default_external, undef: :replace, replace: '')
+    end
+
     def fetch_string(path, content, key, color, increment)
       @count[increment] += 1
       value = increment == :folders ? @folders[key] : @files[key]
@@ -291,7 +295,7 @@ module ColorLS
       name = content.show
       name = make_link(path, name) if @hyperlink
       name += content.directory? ? '/' : ' '
-      entry = "#{logo.encode(Encoding.default_external, undef: :replace, replace: '')}  #{name}"
+      entry = "#{out_encode(logo)}  #{out_encode(name)}"
 
       "#{long_info(content)} #{git_info(content)} #{entry.colorize(color)}#{symlink_info(content)}"
     end
