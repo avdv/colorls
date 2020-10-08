@@ -53,6 +53,7 @@ jobs:
         - touch /C/tools/msys64/--msys2--
       install:
         - bundle install --retry=3
+        - export MSYS=winsymlinks:nativestrict
 
 before_install:
   - gem --version
