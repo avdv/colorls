@@ -83,7 +83,7 @@ module ColorLS
 
         filter_hidden_contents
 
-        @contents.map! { |e| FileInfo.new(File.join(path, e), link_info: @long) }
+        @contents.map! { |e| FileInfo.info(File.join(path, e), link_info: @long) }
 
         filter_contents if @show
         sort_contents   if @sort
