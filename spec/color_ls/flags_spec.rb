@@ -9,9 +9,11 @@ RSpec.describe ColorLS::Flags do
   end
 
   def isWindows?
+    puts "isWindows? #{RUBY_PLATFORM}"
     require 'win32ole'
     true
   rescue LoadError
+    $stderr.puts 'win32ole load error!'
     false
   end
 
