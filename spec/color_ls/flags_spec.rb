@@ -4,6 +4,21 @@ require 'spec_helper'
 RSpec.describe ColorLS::Flags do
   FIXTURES = 'spec/fixtures'.freeze
 
+  def running_in_admin_mode?
+    (`reg query HKU\\S-1-5-19 2>&1` =~ /ERROR/).nil?
+  end
+
+  def isWindows?
+    require 'win32ole'
+    true
+  rescue LoadError
+    false
+  end
+
+  def symlinks_supported?
+    not isWindows? or running_in_admin_mode?
+  end
+
   subject do
     begin
       described_class.new(*args).process
@@ -276,7 +291,13 @@ RSpec.describe ColorLS::Flags do
   context 'symlinked directory with trailing separator' do
     let(:args) { ['-x', File.join(FIXTURES, 'symlinks', 'Supportlink', File::SEPARATOR)] }
 
-    it { expect { subject }.to output(/yaml_sort_checker.rb/).to_stdout }
+    it 'should show the file in the linked directory' do
+      if symlinks_supported?
+        expect { subject }.to output(/yaml_sort_checker.rb/).to_stdout
+      else
+        skip "symlinks not supported"
+      end
+    end
   end
 
   context 'when passing invalid flags' do
