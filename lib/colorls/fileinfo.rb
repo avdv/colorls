@@ -20,9 +20,9 @@ module ColorLS
       handle_symlink(path) if link_info && @stats.symlink?
     end
 
-    def self.info(path)
+    def self.info(path, link_info: true)
       $stderr.puts "info: #{path} - #{path.encoding}"
-      FileInfo.new(path)
+      FileInfo.new(path, link_info: link_info)
     end
 
     def show
