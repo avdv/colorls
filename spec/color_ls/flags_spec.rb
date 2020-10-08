@@ -5,7 +5,9 @@ RSpec.describe ColorLS::Flags do
   FIXTURES = 'spec/fixtures'.freeze
 
   def running_in_admin_mode?
-    (`reg query HKU\\S-1-5-19 2>&1` =~ /ERROR/).nil?
+    out = `reg query HKU\\S-1-5-19 2>&1`
+    $stderr.puts "reg query: #{out}"
+    (out =~ /ERROR/).nil?
   end
 
   def isWindows?
