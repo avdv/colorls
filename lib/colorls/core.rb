@@ -86,7 +86,7 @@ module ColorLS
       info = FileInfo.new(path, link_info: @long)
 
       if info.directory?
-        @contents = Dir.entries(path, encoding: ColorLS::file_encoding)
+        @contents = Dir.entries(path, encoding: ColorLS.file_encoding)
 
         filter_hidden_contents
 
