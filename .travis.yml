@@ -8,37 +8,32 @@ language:
 os:
   - linux
 
-cache:
-  bundler: true
-  directories:
-    - $HOME/AppData/Local/Temp/chocolatey
-    - /C/tools/msys64
+cache: bundler
 
-#rvm:
-  #- '2.5'
-  #- '2.6'
-  #- '2.7'
-  #- 'truffleruby-head'
+rvm:
+  - '2.5'
+  - '2.6'
+  - '2.7'
+  - 'truffleruby-head'
 
 jobs:
   fast_finish: true
 
-#  allow_failures:
-#    - rvm: truffleruby-head
-#    - os: windows
+  allow_failures:
+    - rvm: truffleruby-head
+    - os: windows
 
   include:
-#    - os: osx
-#      rvm: '2.7'
+    - os: osx
+      rvm: '2.7'
 
     - os: windows
       language: bash
-      env:
-        KEY: '1'
       before_cache:
         - |-
           # https://unix.stackexchange.com/a/137322/107554
           pacman --sync --clean --noconfirm
+        - bundle clean
       before_install:
         - ruby --version
         - gem --version
@@ -47,13 +42,17 @@ jobs:
              rm -rf /C/tools/msys64
              choco uninstall -y mingw
              choco upgrade --no-progress -y msys2 --params /NoUpdate || (tail -n 500 /C/ProgramData/chocolatey/logs/chocolatey.log ; exit 1)
-             #- choco install msys2 # --params /NoUpdate
              powershell -Command 'Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass ; & c:\tools\ruby27\bin\ridk.ps1' install dev_tools
           fi
         - touch /C/tools/msys64/--msys2--
       install:
-        - bundle install --retry=3
+        - bundle install --path vendor/bundle --retry=3
         - export MSYS=winsymlinks:nativestrict
+      cache:
+        directories:
+          - $HOME/AppData/Local/Temp/chocolatey
+          - /C/tools/msys64
+          - vendor/bundle
 
 before_install:
   - gem --version
