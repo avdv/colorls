@@ -4,25 +4,6 @@ require 'spec_helper'
 RSpec.describe ColorLS::Flags do
   FIXTURES = 'spec/fixtures'.freeze
 
-  def running_in_admin_mode?
-    out = `reg query HKU\\S-1-5-19 2>&1`
-    $stderr.puts "reg query: #{out}"
-    (out =~ /ERROR/).nil?
-  end
-
-  def isWindows?
-    puts "isWindows? #{RUBY_PLATFORM}"
-    require 'win32ole'
-    true
-  rescue LoadError
-    $stderr.puts 'win32ole load error!'
-    false
-  end
-
-  def symlinks_supported?
-    not isWindows? or running_in_admin_mode?
-  end
-
   subject do
     begin
       described_class.new(*args).process
@@ -296,7 +277,7 @@ RSpec.describe ColorLS::Flags do
     let(:args) { ['-x', File.join(FIXTURES, 'symlinks', 'Supportlink', File::SEPARATOR)] }
 
     it 'should show the file in the linked directory' do
-      if symlinks_supported?
+      if File.symlink? File.join(FIXTURES, 'symlinks', 'Supportlink')
         expect { subject }.to output(/yaml_sort_checker.rb/).to_stdout
       else
         skip "symlinks not supported"
