@@ -8,6 +8,16 @@ module ColorLS
     @file_encoding
   end
 
+  @exit_code = 0
+
+  def self.exit_code
+    @exit_code
+  end
+
+  def self.exit_code=(value)
+    @exit_code = value if value > @exit_code
+  end
+
   class Core
     def initialize(input, all: false, report: false, sort: false, show: false,
       mode: nil, git_status: false, almost_all: false, colors: [], group: nil,
