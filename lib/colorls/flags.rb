@@ -40,11 +40,11 @@ module ColorLS
       init_locale
 
       @args = ['.'] if @args.empty?
-      exit_status_code = 0
+
       @args.sort!.each_with_index do |path, i|
         unless File.exist?(path)
           $stderr.puts "\n   Specified path '#{path}' doesn't exist.".colorize(:red)
-          exit_status_code = 2
+          ColorLS.exit_code = 2
           next
         end
 
@@ -54,7 +54,7 @@ module ColorLS
       rescue SystemCallError => e
         $stderr.puts "#{path}: #{e}".colorize(:red)
       end
-      exit_status_code
+      ColorLS.exit_code
     end
 
     def options

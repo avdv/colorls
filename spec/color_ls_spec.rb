@@ -6,6 +6,10 @@ RSpec.describe ColorLS do
   end
 
   context '::exit_code' do
+    before(:each) {
+      ColorLS.instance_variable_set :@exit_code, 0
+    }
+
     it 'is 0 initially' do
       expect(ColorLS.exit_code).to be == 0
     end
