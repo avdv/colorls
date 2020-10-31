@@ -323,4 +323,15 @@ RSpec.describe ColorLS::Flags do
       expect(subject).to eq 2
     end
   end
+
+  context 'cannot access subdirectory' do
+    let(:args) { [FIXTURES, '--long'] }
+
+    it 'shows normal output and returns status code 1' do
+      allow(ColorLS::FileInfo).to receive(:new).and_call_original
+      allow(ColorLS::FileInfo).to receive(:new).with(File.join(FIXTURES, 'symlinks'), true).and_raise(SystemCallError.new 32)
+
+      expect { subject }.to output(/second-level/).to_stdout and eq(244)
+    end
+  end
 end

@@ -70,6 +70,7 @@ module ColorLS
       @target = File.readlink(path)
       @dead = !File.exist?(path)
     rescue SystemCallError => e
+      #ColorLS.exit_code = 1
       $stderr.puts "cannot read symbolic link: #{e}"
     end
   end
