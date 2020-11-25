@@ -16,10 +16,9 @@ module ColorLS
   end
 
   class Core
-    def initialize(input, all: false, report: false, sort: false, show: false,
-      mode: nil, git_status: false, almost_all: false, colors: [], group: nil,
+    def initialize(all: false, report: false, sort: false, show: false,
+      mode: nil, git_status: false, almost_all: false, colors: {}, group: nil,
       reverse: false, hyperlink: false, tree_depth: nil)
-      @input        = (+input).force_encoding(ColorLS.file_encoding)
       @count        = {folders: 0, recognized_files: 0, unrecognized_files: 0}
       @all          = all
       @almost_all   = almost_all
@@ -37,11 +36,13 @@ module ColorLS
 
       init_colors colors
 
-      @contents   = init_contents(@input)
       init_icons
     end
 
-    def ls
+    def ls(input)
+      @input    = (+input).force_encoding(ColorLS.file_encoding)
+      @contents = init_contents(@input)
+
       return print "\n   Nothing to show here\n".colorize(@colors[:empty]) if @contents.empty?
 
       layout = case
