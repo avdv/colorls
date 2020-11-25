@@ -87,6 +87,8 @@ module ColorLS
     end
 
     def init_contents(path)
+      return path if path.kind_of?(Array)
+
       info = FileInfo.new(path, link_info: @long)
 
       if info.directory?
