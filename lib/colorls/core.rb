@@ -1,3 +1,4 @@
+# coding: utf-8
 # frozen_string_literal: true
 
 module ColorLS
@@ -16,6 +17,7 @@ module ColorLS
   end
 
   class Core
+    #  class Core include Dry::Monads[:result]
     def initialize(all: false, report: false, sort: false, show: false,
       mode: nil, git_status: false, almost_all: false, colors: {}, group: nil,
       reverse: false, hyperlink: false, tree_depth: nil)
@@ -39,8 +41,8 @@ module ColorLS
       init_icons
     end
 
-    def ls(input)
-      @input    = (+input).force_encoding(ColorLS.file_encoding)
+    def ls(files)
+      @input    = files # (+input).force_encoding(ColorLS.file_encoding)
       @contents = init_contents(@input)
 
       return print "\n   Nothing to show here\n".colorize(@colors[:empty]) if @contents.empty?
@@ -86,17 +88,15 @@ module ColorLS
       @contents.map { |item| Unicode::DisplayWidth.of(item.show) + CHARS_PER_ITEM }
     end
 
-    def init_contents(path)
-      return path if path.kind_of?(Array)
-
-      info = FileInfo.new(path, link_info: @long)
+    def init_contents(info)
+      return info if info.is_a?(Array)
 
       if info.directory?
-        @contents = Dir.entries(path, encoding: ColorLS.file_encoding)
+        @contents = Dir.entries(info.path, encoding: ColorLS.file_encoding)
 
         filter_hidden_contents
 
-        @contents.map! { |e| FileInfo.new(File.join(path, e), link_info: @long) }
+        @contents.map! { |e| FileInfo.new(File.join(info.path, e), link_info: @long) }
 
         filter_contents if @show
         sort_contents   if @sort
@@ -317,7 +317,7 @@ module ColorLS
       padding = 0
       line = +''
       chunk.each_with_index do |content, i|
-        entry = fetch_string(@input, content, *options(content))
+        entry = fetch_string(content.path, content, *options(content))
         line << ' ' * padding
         line << '  ' << entry.encode(Encoding.default_external, undef: :replace)
         padding = widths[i] - Unicode::DisplayWidth.of(content.show) - CHARS_PER_ITEM

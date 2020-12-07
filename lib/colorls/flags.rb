@@ -26,6 +26,12 @@ module ColorLS
 
       parse_options
 
+      @exit_status_code = 0
+
+      handle_tree_options
+    end
+
+    def handle_tree_options
       return unless @opts[:mode] == :tree
 
       # FIXME: `--all` and `--tree` do not work together, use `--almost-all` instead
@@ -36,29 +42,45 @@ module ColorLS
       @opts[:report] = false
     end
 
+    def preprocess_arguments
+      @args = ['.'] if @args.empty?
+
+      @args = @args.flat_map do |arg|
+        FileInfo.info(arg)
+      rescue Errno::ENOENT
+        $stderr.puts "colorls: Specified path '#{arg}' doesn't exist.".colorize(:red)
+        @exit_status_code = 2
+        []
+      rescue SystemCallError => e
+        $stderr.puts "#{path}: #{e}".colorize(:red)
+        @exit_status_code = 2
+        []
+      end
+    end
+
     def process
       init_locale
 
-      @args = ['.'] if @args.empty?
+      preprocess_arguments
+
+      puts '' if @exit_status_code > 0
+
+      directories, files = @args.group_by(&:directory?).values_at(true, false)
 
       core = Core.new(**@opts)
 
-      exit_status_code = 0
-      @args.sort!.each_with_index do |path, i|
-        unless File.exist?(path)
-          $stderr.puts "\n   Specified path '#{path}' doesn't exist.".colorize(:red)
-          exit_status_code = 2
-          next
-        end
+      core.ls(files) unless files.nil?
 
-        puts '' if i.positive?
-        puts "\n#{path}:" if Dir.exist?(path) && @args.size > 1
+      return @exit_status_code if directories.nil?
 
-        core.ls(path)
+      directories.sort_by! { |a| CLocale.strxfrm(a.name) }.each do |dir|
+        puts "\n#{dir.show}:" if @args.size > 1
+
+        core.ls(dir)
       rescue SystemCallError => e
         $stderr.puts "#{path}: #{e}".colorize(:red)
       end
-      exit_status_code
+      @exit_status_code
     end
 
     def options

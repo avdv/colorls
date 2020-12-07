@@ -9,9 +9,10 @@ module ColorLS
     @@users  = {}              # rubocop:disable Style/ClassVars
     @@groups = {}              # rubocop:disable Style/ClassVars
 
-    attr_reader :stats, :name
+    attr_reader :stats, :name, :path
 
     def initialize(path, link_info: true)
+      @path = path
       @name = File.basename(path)
       @stats = File.lstat(path)
 
@@ -20,8 +21,10 @@ module ColorLS
       handle_symlink(path) if link_info && @stats.symlink?
     end
 
-    def self.info(path)
-      FileInfo.new(path)
+    def self.info(path, link_info: true)
+      # Try {
+      FileInfo.new(path, link_info: link_info)
+      # }
     end
 
     def show

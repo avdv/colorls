@@ -60,6 +60,7 @@ Gem::Specification.new do |spec|
   spec.post_install_message = POST_INSTALL_MESSAGE
 
   spec.add_runtime_dependency 'clocale', '~> 0'
+  spec.add_runtime_dependency 'dry-monads', '~> 1.3'
   spec.add_runtime_dependency 'filesize', '~> 0'
   spec.add_runtime_dependency 'manpages', '~> 0'
   spec.add_runtime_dependency 'rainbow', '>= 2.2', '< 4.0'
