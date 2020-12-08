@@ -1,0 +1,32 @@
+name: Check
+
+on:
+  push
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        ruby: [ '2.5', '2.6', '2.7' ]
+    name: Test Ruby ${{ matrix.ruby }} - ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@v2.3.4
+    - uses: actions/cache@v2
+      with:
+        path: vendor/bundle
+        key: ${{ runner.os }}-gems-${{ hashFiles('*.gemspec') }}
+        restore-keys: |
+          ${{ runner.os }}-gems-
+    - uses: actions/setup-ruby@v1
+      with:
+        ruby-version: ${{ matrix.ruby }}
+    - name: Install dependencies
+      run: |
+        gem install bundler
+        bundle config set path 'vendor/bundle'
+        bundle install --jobs 4 --retry 3
+    - name: Test
+      run: bundle exec rake
+    - run: bundle clean
