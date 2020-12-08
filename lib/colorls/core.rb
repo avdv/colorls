@@ -28,8 +28,7 @@ module ColorLS
       @horizontal   = mode == :horizontal
       process_git_status_details(git_status)
 
-      @screen_width = IO.console.winsize[1]
-      @screen_width = 80 if @screen_width.zero?
+      @screen_width = terminal_width
 
       init_colors colors
 
@@ -79,6 +78,16 @@ module ColorLS
       @long = mode == :long
       @show_group = show_group
       @show_user = show_user
+    end
+
+    def terminal_width
+      console = IO.console
+
+      width = IO.console_size[1]
+
+      return width if console.nil? || console.winsize[1].zero?
+
+      console.winsize[1]
     end
 
     # how much characters an item occupies besides its name
